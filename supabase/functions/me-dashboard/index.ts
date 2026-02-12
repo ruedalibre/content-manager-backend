@@ -1,22 +1,15 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/* =========================
-   CORS CONFIG
-========================= */
-
+// 🔐 CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
 
-/* =========================
-   FUNCTION
-========================= */
-
 Deno.serve(async (req) => {
 
-  // Preflight
+  // 🧭 1️⃣ Manejar preflight (OPTIONS)
   if (req.method === "OPTIONS") {
     return new Response("ok", {
       headers: corsHeaders,
@@ -39,6 +32,7 @@ Deno.serve(async (req) => {
       );
     }
 
+    // 🧱 Cliente Supabase
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
@@ -51,6 +45,7 @@ Deno.serve(async (req) => {
       }
     );
 
+    // 👤 Usuario autenticado
     const {
       data: { user },
       error: userError,
@@ -66,15 +61,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    // 📊 Vista dashboard
     const { data, error } = await supabase
-      .from("user_contents_by_platform")
+      .from("user_dashboard_summary")
       .select("*")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .single();
 
     if (error) {
       return new Response(
         JSON.stringify({
-          error: error.message,
+          error: "View query error",
+          details: error.message,
         }),
         {
           status: 500,
@@ -83,6 +81,7 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ✅ Respuesta final
     return new Response(
       JSON.stringify(data),
       {
