@@ -15,10 +15,6 @@ const corsHeaders = {
 ========================= */
 
 Deno.serve(async (req) => {
-  /* -------------------------
-     HANDLE PREFLIGHT (OPTIONS)
-  ------------------------- */
-
   if (req.method === "OPTIONS") {
     return new Response("ok", {
       headers: corsHeaders,
@@ -26,23 +22,22 @@ Deno.serve(async (req) => {
   }
 
   try {
-    /* -------------------------
-       SUPABASE CLIENT
-    ------------------------- */
-
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get(
+        "SUPABASE_SERVICE_ROLE_KEY"
+      )!
     );
 
-    /* -------------------------
-       QUERY — ADMIN CONTENT GROWTH
-    ------------------------- */
-
-    const { data, error } = await supabase
-      .from("admin_content_growth")
-      .select("*")
-      .order("month", { ascending: true });
+    const { data, error } =
+      await supabase
+        .from(
+          "admin_content_growth_cumulative"
+        )
+        .select("*")
+        .order("month", {
+          ascending: true,
+        });
 
     if (error) {
       return new Response(
@@ -53,41 +48,31 @@ Deno.serve(async (req) => {
           status: 500,
           headers: {
             ...corsHeaders,
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
         }
       );
     }
-
-    /* -------------------------
-       SUCCESS RESPONSE
-    ------------------------- */
 
     return new Response(
       JSON.stringify(data),
       {
         headers: {
           ...corsHeaders,
-          "Content-Type": "application/json",
+          "Content-Type":
+            "application/json",
         },
       }
     );
-
   } catch (err) {
-    /* -------------------------
-       UNEXPECTED ERROR
-    ------------------------- */
-
     return new Response(
       JSON.stringify({
         error: String(err),
       }),
       {
         status: 500,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: corsHeaders,
       }
     );
   }

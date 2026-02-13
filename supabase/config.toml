@@ -470,3 +470,25 @@ entrypoint = "./functions/me-dashboard/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/me-dashboard/*.html" ]
+
+[functions.admin-content-growth-cumulative]
+enabled = true
+verify_jwt = false
+import_map = "./functions/admin-content-growth-cumulative/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/admin-content-growth-cumulative/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/admin-content-growth-cumulative/*.html" ]
+
+[functions.admin-content-growth-rate]
+enabled = true
+verify_jwt = false
+import_map = "./functions/admin-content-growth-rate/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/admin-content-growth-rate/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/admin-content-growth-rate/*.html" ]
