@@ -1,7 +1,37 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+/* =========================
+   CORS HEADERS
+========================= */
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods":
+    "GET, POST, OPTIONS",
+};
+
+/* =========================
+   SERVER
+========================= */
+
 Deno.serve(async (req) => {
+  /* =========================
+     PREFLIGHT HANDLER
+  ========================= */
+
+  if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      headers: corsHeaders,
+    });
+  }
+
   try {
+    /* =========================
+       AUTH HEADER
+    ========================= */
+
     const authHeader =
       req.headers.get("Authorization");
 
@@ -11,9 +41,16 @@ Deno.serve(async (req) => {
           error:
             "Missing Authorization header",
         }),
-        { status: 401 },
+        {
+          status: 401,
+          headers: corsHeaders,
+        },
       );
     }
+
+    /* =========================
+       SUPABASE CLIENT
+    ========================= */
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -27,6 +64,10 @@ Deno.serve(async (req) => {
       },
     );
 
+    /* =========================
+       GET USER
+    ========================= */
+
     const {
       data: { user },
       error: userError,
@@ -37,9 +78,16 @@ Deno.serve(async (req) => {
         JSON.stringify({
           error: "Unauthorized",
         }),
-        { status: 401 },
+        {
+          status: 401,
+          headers: corsHeaders,
+        },
       );
     }
+
+    /* =========================
+       QUERY HEATMAP
+    ========================= */
 
     const { data, error } =
       await supabase
@@ -52,18 +100,24 @@ Deno.serve(async (req) => {
         JSON.stringify({
           error: error.message,
         }),
-        { status: 500 },
+        {
+          status: 500,
+          headers: corsHeaders,
+        },
       );
     }
+
+    /* =========================
+       SUCCESS RESPONSE
+    ========================= */
 
     return new Response(
       JSON.stringify(data),
       {
         headers: {
+          ...corsHeaders,
           "Content-Type":
             "application/json",
-          "Access-Control-Allow-Origin":
-            "*",
         },
       },
     );
@@ -72,7 +126,10 @@ Deno.serve(async (req) => {
       JSON.stringify({
         error: String(err),
       }),
-      { status: 500 },
+      {
+        status: 500,
+        headers: corsHeaders,
+      },
     );
   }
 });
